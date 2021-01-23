@@ -282,8 +282,21 @@ function displayErrorTrace(errors, settings) {
     }
     // Error Trace Exploration
     const elErrorTraceExploration = document.getElementById('error-trace-exploration');
+    const elErrorTraceExplorationTextArea = document.getElementById('error-trace-exploration-textarea');
+    const elErrorTraceExplorationButton = document.getElementById('error-trace-exploration-button');
     elErrorTraceExploration.classList.remove('hidden');
-    document.getElementById('error-trace-exploration-button').onclick = () => runErrorTraceExploration('[pitoco |-> 421]');
+    elErrorTraceExplorationButton.onclick = () => {
+        const traceExpression = elErrorTraceExplorationTextArea.value;
+        runErrorTraceExploration(traceExpression);
+    }
+    elErrorTraceExplorationTextArea.oninput = (e) => {
+        if (e.target.value.trim() != "") {
+            elErrorTraceExplorationButton.disabled = false;
+        }
+        else {
+            elErrorTraceExplorationButton.disabled = true;
+        }
+    }
 }
 
 function displayErrorTraceItem(elErrorTraceVars, item, showUnmodified, filterItems) {

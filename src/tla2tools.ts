@@ -106,7 +106,7 @@ export async function runTlc(tlaFilePath: string, cfgFilePath: string): Promise<
     );
 }
 
-export async function runTraceExplorer(tlaFilePath: string): Promise<ToolProcessInfo> {    
+export async function runTraceExplorer(tlaFilePath: string, traceExpression: string): Promise<ToolProcessInfo> {    
     const javaOptions = [];
     const shareStats = vscode.workspace.getConfiguration().get<ShareOption>(CFG_TLC_STATISTICS_TYPE);
     if (shareStats !== ShareOption.DoNotShare) {
@@ -115,7 +115,7 @@ export async function runTraceExplorer(tlaFilePath: string): Promise<ToolProcess
     return runTool(
         TlaTool.TRACE_EXPLORER,
         tlaFilePath,
-        buildTraceExplorerOptions(tlaFilePath, '[abc |-> 101]'),
+        buildTraceExplorerOptions(tlaFilePath, traceExpression),
         javaOptions
     );
 }
@@ -201,8 +201,8 @@ export function buildTlcOptions(tlaFilePath: string, cfgFilePath: string, custom
 /**
  * Builds an array of options to pass to the TraceExplorer tool.
  */
-export function buildTraceExplorerOptions(tlaFilePath: string, traceExpressions: string): string[] {    
-    const opts = ['-overwrite', '-generateSpecTE', '-expressions', traceExpressions, path.basename(tlaFilePath)];    
+export function buildTraceExplorerOptions(tlaFilePath: string, traceExpression: string): string[] {    
+    const opts = ['-overwrite', '-generateSpecTE', '-expressions', traceExpression, path.basename(tlaFilePath, '.tla')];    
     return opts;
 }
 

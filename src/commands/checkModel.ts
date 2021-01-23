@@ -16,6 +16,7 @@ export const CMD_CHECK_MODEL_RUN_AGAIN = 'tlaplus.model.check.runAgain';
 export const CMD_CHECK_MODEL_CUSTOM_RUN = 'tlaplus.model.check.customRun';
 export const CMD_CHECK_MODEL_STOP = 'tlaplus.model.check.stop';
 export const CMD_CHECK_MODEL_DISPLAY = 'tlaplus.model.check.display';
+export const CMD_CHECK_MODEL_RUN_ERROR_TRACE_EXPLORATION = 'tlaplus.model.check.runErrorTraceExploration';
 export const CMD_SHOW_TLC_OUTPUT = 'tlaplus.showTlcOutput';
 export const CTX_TLC_RUNNING = 'tlaplus.tlc.isRunning';
 export const CTX_TLC_CAN_RUN_AGAIN = 'tlaplus.tlc.canRunAgain';
@@ -65,7 +66,8 @@ export async function runLastCheckAgain(
     doCheckModel(lastCheckFiles, true, extContext, diagnostic);
 }
 
-export async function runLasstCheckAgain(
+export async function runErrorTraceExploration(
+    traceExpression: string,
     diagnostic: vscode.DiagnosticCollection,
     extContext: vscode.ExtensionContext
 ): Promise<void> {
@@ -76,7 +78,7 @@ export async function runLasstCheckAgain(
     if (!canRunTlc(extContext)) {
         return;
     }
-    doCheckModel(lastCheckFiles, true, extContext, diagnostic);
+    doErrorTraceExploration(traceExpression, lastCheckFiles, true, extContext, diagnostic);
 }
 
 export async function checkModelCustom(
@@ -203,6 +205,49 @@ export async function doCheckModel(
         const dCol = await stdoutParser.readAll();
         applyDCollection(dCol, diagnostic);
         return resultHolder.checkResult;
+    } catch (err) {
+        statusBarItem.hide();
+        vscode.window.showErrorMessage(err.message);
+    }
+    return undefined;
+}
+
+export async function doErrorTraceExploration(
+    traceExpression: string,
+    specFiles: SpecFiles,
+    showCheckResultView: boolean,
+    extContext: vscode.ExtensionContext,
+    diagnostic: vscode.DiagnosticCollection
+): Promise<ModelCheckResult | undefined> {
+    try {
+        lastCheckFiles = specFiles;
+        updateStatusBarItem(true);
+        const traceExplorerProcInfo = await runTraceExplorer(specFiles.tlaFilePath, traceExpression);
+        traceExplorerProcInfo.process.on('close', async () => {
+            const procInfo = await runTlc(path.join(path.dirname(specFiles.tlaFilePath), "TTrace.tla"), "TTrace.cfg");
+            outChannel.bindTo(procInfo);
+            checkProcess = procInfo.process;
+            checkProcess.on('close', () => {
+                checkProcess = undefined;
+                updateStatusBarItem(false);
+            });
+            updateStatusBarItem(false);
+            const resultHolder = new CheckResultHolder();
+            const stdoutParser = new TlcModelCheckerStdoutParser(
+                ModelCheckResultSource.Process,
+                checkProcess.stdout,
+                specFiles,
+                true,
+                (checkResult) => {
+                    resultHolder.checkResult = checkResult;
+                    if (showCheckResultView) {
+                        updateCheckResultView(checkResult);
+                    }
+                });
+            const dCol = await stdoutParser.readAll();
+            applyDCollection(dCol, diagnostic);
+            return resultHolder.checkResult;
+        });
     } catch (err) {
         statusBarItem.hide();
         vscode.window.showErrorMessage(err.message);
