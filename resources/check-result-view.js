@@ -86,6 +86,13 @@ function runCheckAgain() {
     });
 }
 
+function runErrorTraceExploration(traceExpression) {
+    vscode.postMessage({
+        command: 'runErrorTraceExploration',
+        traceExpression: traceExpression
+    });
+}
+
 function showTlcOutput() {
     vscode.postMessage({
         command: 'showTlcOutput'
@@ -272,6 +279,23 @@ function displayErrorTrace(errors, settings) {
             elName.parentElement.parentElement.querySelector('.tree-nodes').classList.toggle('shown');
             elName.classList.toggle('tree-expandable-down');
         };
+    }
+    // Error Trace Exploration
+    const elErrorTraceExploration = document.getElementById('error-trace-exploration');
+    const elErrorTraceExplorationTextArea = document.getElementById('error-trace-exploration-textarea');
+    const elErrorTraceExplorationButton = document.getElementById('error-trace-exploration-button');
+    elErrorTraceExploration.classList.remove('hidden');
+    elErrorTraceExplorationButton.onclick = () => {
+        const traceExpression = elErrorTraceExplorationTextArea.value;
+        runErrorTraceExploration(traceExpression);
+    }
+    elErrorTraceExplorationTextArea.oninput = (e) => {
+        if (e.target.value.trim() != "") {
+            elErrorTraceExplorationButton.disabled = false;
+        }
+        else {
+            elErrorTraceExplorationButton.disabled = true;
+        }
     }
 }
 

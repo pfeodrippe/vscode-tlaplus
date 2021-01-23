@@ -34,6 +34,7 @@ enum TlaTool {
     PLUS_CAL = 'pcal.trans',
     SANY = 'tla2sany.SANY',
     TLC = 'tlc2.TLC',
+    TRACE_EXPLORER = 'tlc2.TraceExplorer',
     TEX = 'tla2tex.TLA'
 }
 
@@ -101,6 +102,20 @@ export async function runTlc(tlaFilePath: string, cfgFilePath: string): Promise<
         TlaTool.TLC,
         tlaFilePath,
         buildTlcOptions(tlaFilePath, cfgFilePath, customOptions),
+        javaOptions
+    );
+}
+
+export async function runTraceExplorer(tlaFilePath: string, traceExpression: string): Promise<ToolProcessInfo> {    
+    const javaOptions = [];
+    const shareStats = vscode.workspace.getConfiguration().get<ShareOption>(CFG_TLC_STATISTICS_TYPE);
+    if (shareStats !== ShareOption.DoNotShare) {
+        javaOptions.push('-Dtlc2.TLC.ide=vscode');
+    }
+    return runTool(
+        TlaTool.TRACE_EXPLORER,
+        tlaFilePath,
+        buildTraceExplorerOptions(tlaFilePath, traceExpression),
         javaOptions
     );
 }
@@ -181,6 +196,14 @@ export function buildTlcOptions(tlaFilePath: string, cfgFilePath: string, custom
     addValueOrDefault('-coverage', '1', custOpts, opts);
     addValueOrDefault('-config', cfgFilePath, custOpts, opts);
     return opts.concat(custOpts);
+}
+
+/**
+ * Builds an array of options to pass to the TraceExplorer tool.
+ */
+export function buildTraceExplorerOptions(tlaFilePath: string, traceExpression: string): string[] {    
+    const opts = ['-overwrite', '-generateSpecTE', '-expressions', traceExpression, path.basename(tlaFilePath, '.tla')];    
+    return opts;
 }
 
 /**
