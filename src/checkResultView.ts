@@ -84,6 +84,8 @@ function createNewPanel() {
             vscode.commands.executeCommand(CMD_SHOW_TLC_OUTPUT);
         } else if (message.command === 'runAgain') {
             vscode.commands.executeCommand(CMD_CHECK_MODEL_RUN_AGAIN);
+        } else if (message.command === 'runErrorTraceExploration') {
+            vscode.commands.executeCommand(CMD_CHECK_MODEL_RUN_AGAIN);
         } else if (message.command === 'openFile') {
             // `One` is used here because at the moment, VSCode doesn't provide API
             // for revealing existing document, so we're speculating here to reduce open documents duplication.

@@ -86,6 +86,13 @@ function runCheckAgain() {
     });
 }
 
+function runErrorTraceExploration(traceExpression) {
+    vscode.postMessage({
+        command: 'runErrorTraceExploration',
+        traceExpression: traceExpression
+    });
+}
+
 function showTlcOutput() {
     vscode.postMessage({
         command: 'showTlcOutput'
@@ -273,6 +280,10 @@ function displayErrorTrace(errors, settings) {
             elName.classList.toggle('tree-expandable-down');
         };
     }
+    // Error Trace Exploration
+    const elErrorTraceExploration = document.getElementById('error-trace-exploration');
+    elErrorTraceExploration.classList.remove('hidden');
+    document.getElementById('error-trace-exploration-button').onclick = () => runErrorTraceExploration('[pitoco |-> 421]');
 }
 
 function displayErrorTraceItem(elErrorTraceVars, item, showUnmodified, filterItems) {

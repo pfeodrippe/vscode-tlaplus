@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { copyFile } from 'fs';
-import { runTlc, stopProcess } from '../tla2tools';
+import { runTlc, runTraceExplorer, stopProcess } from '../tla2tools';
 import { TlcModelCheckerStdoutParser } from '../parsers/tlc';
 import { updateCheckResultView, revealEmptyCheckResultView, revealLastCheckResultView } from '../checkResultView';
 import { applyDCollection } from '../diagnostic';
@@ -52,6 +52,20 @@ export async function checkModel(
 }
 
 export async function runLastCheckAgain(
+    diagnostic: vscode.DiagnosticCollection,
+    extContext: vscode.ExtensionContext
+): Promise<void> {
+    if (!lastCheckFiles) {
+        vscode.window.showWarningMessage('No last check to run');
+        return;
+    }
+    if (!canRunTlc(extContext)) {
+        return;
+    }
+    doCheckModel(lastCheckFiles, true, extContext, diagnostic);
+}
+
+export async function runLasstCheckAgain(
     diagnostic: vscode.DiagnosticCollection,
     extContext: vscode.ExtensionContext
 ): Promise<void> {
