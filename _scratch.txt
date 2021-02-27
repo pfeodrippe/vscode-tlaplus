@@ -1,0 +1,8 @@
+## "Go to definition" for definitions in module extended
+## https://github.com/alygin/vscode-tlaplus/issues/181
+
+TODO: 
+- [ ] Try to extract imported modules to `TlaDocumentInfo` (next to `tryExtractSymbol` method definition).
+      Maybe we have to extract the imported modules first, let's see how this works;
+- [ ] At `tlaDeclaration.symbolLocations`, if we don't find it in it's own module, check for the imported ones;
+- [ ] Maybe make it work for monoliths;
